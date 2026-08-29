@@ -8,15 +8,12 @@ from sklearn.ensemble import RandomForestClassifier
 
 st.set_page_config(page_title="Indian Bank Loan Eligibility Portal", page_icon="🏦", layout="wide")
 
-# Fallback Artifact Generator for Cloud Environments
-def generate_artifacts_if_missing():
+# Inline artifact generator
+def ensure_artifacts():
     os.makedirs("src", exist_ok=True)
-    model_p = "src/best_model.pkl"
-    scaler_p = "src/scaler.pkl"
-    encoders_p = "src/encoders.pkl"
+    m_path, s_path, e_path = "src/best_model.pkl", "src/scaler.pkl", "src/encoders.pkl"
 
-    if not (os.path.exists(model_p) and os.path.exists(scaler_p) and os.path.exists(encoders_p)):
-        st.warning("⚠️ Model artifacts missing on host. Training inline models...")
+    if not (os.path.exists(m_path) and os.path.exists(s_path) and os.path.exists(e_path)):
         np.random.seed(42)
         n = 600
         data = {
@@ -57,11 +54,11 @@ def generate_artifacts_if_missing():
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X, y)
 
-        joblib.dump(model, model_p)
-        joblib.dump(scaler, scaler_p)
-        joblib.dump(encoders, encoders_p)
+        joblib.dump(model, m_path)
+        joblib.dump(scaler, s_path)
+        joblib.dump(encoders, e_path)
 
-generate_artifacts_if_missing()
+ensure_artifacts()
 
 @st.cache_resource
 def load_artifacts():
@@ -73,7 +70,6 @@ def load_artifacts():
 
 model, scaler, encoders = load_artifacts()
 
-st.image("https://upload.wikimedia.org/wikipedia/commons/e/e7/Indian_Bank_logo.svg", width=300)
 st.title("🏦 Indian Bank Loan Eligibility Portal")
 st.write("Enter financial and demographic details to evaluate real-time loan approval eligibility.")
 
